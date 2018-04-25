@@ -51,8 +51,10 @@ def send_email(name, phone, ip, mac, hostname):
             smtp.login(MAIL_USERNAME, MAIL_PASSWORD)
         smtp.sendmail(SENDER, RECIPIENTS, msg.as_string())
         smtp.quit()
+        return message
     except SMTPException as e:
         print 'Не удалось отправить письмо: %s' % str(e)
+        return False
 
 
 def get_mac_by_ip(ip_address):
@@ -88,9 +90,13 @@ def index():
     if request.method == 'POST':
         errors = validate_form(request.form)
         if not errors:
-            send_email(request.form['name'], request.form['phone'],
-                request.remote_addr, get_mac_by_ip(request.remote_addr), hostname=get_hostname(request.remote_addr))
-            return render_template('success.html')
+            if send_email(request.form['name'], request.form['phone'],
+                request.remote_addr, get_mac_by_ip(request.remote_addr), hostname=get_hostname(request.remote_addr)):
+                return render_template('success.html')
+            else:
+                errors['smtp'] = u'Ошибка отправки письма'
+                return render_template('index.html', ip=request.remote_addr, mac=get_mac_by_ip(request.remote_addr), 
+                                       hostname=get_hostname(request.remote_addr), errors=errors)
     return render_template('index.html', ip=request.remote_addr, mac=get_mac_by_ip(request.remote_addr), 
                            hostname=get_hostname(request.remote_addr), errors=errors)
 
