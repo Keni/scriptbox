@@ -33,11 +33,12 @@ message_body = u"""
 Номер телефона: %s
 IP: %s
 MAC: %s
+HOSTNAME: %s
 """
 
 
-def send_email(name, phone, ip, mac):
-    message = message_body % (name, phone, ip, mac)
+def send_email(name, phone, ip, mac, hostname):
+    message = message_body % (name, phone, ip, mac, hostname)
 
     msg = MIMEText(message.encode('utf-8'), 'plain', 'utf-8')
     msg['From'] = SENDER
@@ -64,6 +65,14 @@ def get_mac_by_ip(ip_address):
         mac = u'Unknown'
     return mac
 
+def get_hostname(ip_address):
+    pid = Popen(["nbtscan", "-e", ip_address], stdout=PIPE)
+    s = pid.communicate()[0]
+    try:
+        hostname = re.sub(ip_address, '', s)
+    except:
+        hostname = u'Unknown'
+    return hostname
 
 def validate_form(form):
     errors = {}
@@ -73,7 +82,6 @@ def validate_form(form):
         errors['phone'] = u'Обязательное поле'
     return errors
 
-
 @app.route("/", methods=['POST', 'GET'])
 def index():
     errors = {}
@@ -81,9 +89,10 @@ def index():
         errors = validate_form(request.form)
         if not errors:
             send_email(request.form['name'], request.form['phone'],
-                request.remote_addr, get_mac_by_ip(request.remote_addr))
+                request.remote_addr, get_mac_by_ip(request.remote_addr), hostname=get_hostname(request.remote_addr))
             return render_template('success.html')
-    return render_template('index.html', ip=request.remote_addr, mac=get_mac_by_ip(request.remote_addr), errors=errors)
+    return render_template('index.html', ip=request.remote_addr, mac=get_mac_by_ip(request.remote_addr), 
+                           hostname=get_hostname(request.remote_addr), errors=errors)
 
 if __name__ == "__main__":
     app.run(IP, PORT)
