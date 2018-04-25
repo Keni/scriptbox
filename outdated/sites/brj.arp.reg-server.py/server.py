@@ -44,6 +44,8 @@ HOSTNAME: %s
 
 def send_email(name, department, phone_ext, phone, ip, mac, hostname):
     message = message_body % (name ,department, phone_ext, phone, ip, mac, hostname)
+    
+    send_mess(roomID, message)
 
     msg = MIMEText(message.encode('utf-8'), 'plain', 'utf-8')
     msg['From'] = SENDER
