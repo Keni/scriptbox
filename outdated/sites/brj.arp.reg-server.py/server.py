@@ -30,15 +30,17 @@ RECIPIENTS = ['', '']
 message_subject = 'Регистрация'
 message_body = u"""
 Имя: %s
-Номер телефона: %s
+Отдел: %s
+Внутренний телефон: %s
+Мобильный телефон: %s
 IP: %s
 MAC: %s
 HOSTNAME: %s
 """
 
 
-def send_email(name, phone, ip, mac, hostname):
-    message = message_body % (name, phone, ip, mac, hostname)
+def send_email(name, department, phone_ext, phone, ip, mac, hostname):
+    message = message_body % (name ,department, phone_ext, phone, ip, mac, hostname)
 
     msg = MIMEText(message.encode('utf-8'), 'plain', 'utf-8')
     msg['From'] = SENDER
@@ -80,6 +82,10 @@ def validate_form(form):
     errors = {}
     if not form['name']:
         errors['name'] = u'Обязательное поле'
+    if not form['department']:
+        errors['department'] = u'Обязательное поле'
+    if not form['phone_ext']:
+        errors['phone_ext'] = u'Обязательное поле'
     if not form['phone']:
         errors['phone'] = u'Обязательное поле'
     return errors
@@ -90,7 +96,7 @@ def index():
     if request.method == 'POST':
         errors = validate_form(request.form)
         if not errors:
-            if send_email(request.form['name'], request.form['phone'],
+            if send_email(request.form['name'], request.form['department'], request.form['phone_ext'], request.form['phone'],
                 request.remote_addr, get_mac_by_ip(request.remote_addr), hostname=get_hostname(request.remote_addr)):
                 return render_template('success.html')
             else:
