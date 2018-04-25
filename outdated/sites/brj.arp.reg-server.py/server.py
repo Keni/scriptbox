@@ -16,6 +16,9 @@ app.config.from_object(__name__)
 IP = '0.0.0.0'
 PORT = 8000
 
+telegramBotUrl = "https://api.telegram.org/"
+roomID = ''
+
 ARP_COMMAND = '/usr/sbin/arp'
 ARP_FLAGS = '-n'
 MAC_REGEXP = r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})"
@@ -89,6 +92,11 @@ def validate_form(form):
     if not form['phone']:
         errors['phone'] = u'Обязательное поле'
     return errors
+
+def send_mess(chat, text):
+    params = {'chat_id': chat, 'text': text}
+    response = request.post(telegramBotUrl + 'sendMessage', data=params)
+    return response
 
 @app.route("/", methods=['POST', 'GET'])
 def index():
