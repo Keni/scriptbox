@@ -25,7 +25,7 @@ MAIL_USERNAME = ''
 MAIL_PASSWORD = ''
 
 SENDER = 'www@localhost'
-RECIPIENT = 'sam@brj.pp.ru'
+RECIPIENTS = ['', '']
 
 message_subject = 'Регистрация'
 message_body = u"""
@@ -41,14 +41,14 @@ def send_email(name, phone, ip, mac):
 
     msg = MIMEText(message.encode('utf-8'), 'plain', 'utf-8')
     msg['From'] = SENDER
-    msg['To'] = RECIPIENT
+    msg['To'] = ", ".join(RECIPIENTS)
     msg['Subject'] = unicode(message_subject, 'utf-8')
 
     try:
         smtp = SMTP(MAIL_SERVER)
         if MAIL_USERNAME:
             smtp.login(MAIL_USERNAME, MAIL_PASSWORD)
-        smtp.sendmail(SENDER, [RECIPIENT, ], msg.as_string())
+        smtp.sendmail(SENDER, RECIPIENTS, msg.as_string())
         smtp.quit()
     except SMTPException as e:
         print 'Не удалось отправить письмо: %s' % str(e)
